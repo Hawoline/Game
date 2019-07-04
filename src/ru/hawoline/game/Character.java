@@ -22,8 +22,8 @@ class Character extends Pane implements Movement{
     private Rectangle removeRect = null;
     SpriteAnimation animation;
 
-    private int health;
-    private int intelligence;
+    int health;
+    int intelligence;
 
     Character(ImageView imageView){
         this.imageView = imageView;
@@ -32,6 +32,23 @@ class Character extends Pane implements Movement{
         getChildren().add(imageView);
 
         this.intelligence = 0;
+        this.health = 200;
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
+
+    public int getIntelligence() {
+        return intelligence;
+    }
+
+    public void setIntelligence(int intelligence) {
+        this.intelligence = intelligence;
     }
 
     @Override

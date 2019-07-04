@@ -2,6 +2,7 @@ package ru.hawoline.game;
 
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
+import javafx.print.PageLayout;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -29,6 +30,9 @@ public class Main extends Application {
 
     private KeyCode[] firstPlayerKeyCodes = {KeyCode.UP, KeyCode.DOWN, KeyCode.RIGHT, KeyCode.LEFT};
     private KeyCode[] secondPlayerKeyCodes = {KeyCode.W, KeyCode.S, KeyCode.D, KeyCode.A};
+
+    private boolean playerWasDied = false;
+    private boolean secondPlayerWasDied = false;
 
     static int rootWidth = 600;
     static int rootHeight = 600;
@@ -77,9 +81,7 @@ public class Main extends Application {
     private void update() {
         int counter = 0;
 
-        for (Bullet bullet: bullets){
-            bullet.move();
-        }
+        updateBullets();
 
         for (KeyCode keyCode: firstPlayerKeyCodes){
             if (!isPressed(keyCode))
@@ -99,60 +101,95 @@ public class Main extends Application {
             secondPlayer.animation.stop();
         }
 
-        if (isPressed(KeyCode.UP)) {
-            player.animation.play();
-            player.animation.setOffsetY(96);
-            player.moveY(-2);
-        }
-        if (isPressed(KeyCode.DOWN)) {
-            player.animation.play();
-            player.animation.setOffsetY(0);
-            player.moveY(2);
-        }
-        if (isPressed(KeyCode.RIGHT)) {
-            player.animation.play();
-            player.animation.setOffsetY(64);
-            player.moveX(2);
-        }
-        if (isPressed(KeyCode.LEFT)) {
-            player.animation.play();
-            player.animation.setOffsetY(32);
-            player.moveX(-2);
-        }
-        if (isPressed(KeyCode.W)) {
-            secondPlayer.animation.play();
-            secondPlayer.animation.setOffsetY(96);
-            secondPlayer.moveY(-2);
-        }
-        if (isPressed(KeyCode.S)) {
-            secondPlayer.animation.play();
-            secondPlayer.animation.setOffsetY(0);
-            secondPlayer.moveY(2);
-        }
-        if (isPressed(KeyCode.D)) {
-            secondPlayer.animation.play();
-            secondPlayer.animation.setOffsetY(64);
-            secondPlayer.moveX(2);
-        }
-        if (isPressed(KeyCode.A)) {
-            secondPlayer.animation.play();
-            secondPlayer.animation.setOffsetY(32);
-            secondPlayer.moveX(-2);
+        if (!playerWasDied){
+            if (isPressed(KeyCode.UP)) {
+                player.animation.play();
+                player.animation.setOffsetY(96);
+                player.moveY(-2);
+            }
+            if (isPressed(KeyCode.DOWN)) {
+                player.animation.play();
+                player.animation.setOffsetY(0);
+                player.moveY(2);
+            }
+            if (isPressed(KeyCode.RIGHT)) {
+                player.animation.play();
+                player.animation.setOffsetY(64);
+                player.moveX(2);
+            }
+            if (isPressed(KeyCode.LEFT)) {
+                player.animation.play();
+                player.animation.setOffsetY(32);
+                player.moveX(-2);
+            }
+            if (isPressed(KeyCode.BACK_SPACE)){
+                shoot(player);
+            }
         }
 
-        if (isPressed(KeyCode.SPACE)){
-            shoot(player);
-        }
-        if (isPressed(KeyCode.BACK_SPACE)){
-            shoot(secondPlayer);
+        if (!secondPlayerWasDied){
+            if (isPressed(KeyCode.W)) {
+                secondPlayer.animation.play();
+                secondPlayer.animation.setOffsetY(96);
+                secondPlayer.moveY(-2);
+            }
+            if (isPressed(KeyCode.S)) {
+                secondPlayer.animation.play();
+                secondPlayer.animation.setOffsetY(0);
+                secondPlayer.moveY(2);
+            }
+            if (isPressed(KeyCode.D)) {
+                secondPlayer.animation.play();
+                secondPlayer.animation.setOffsetY(64);
+                secondPlayer.moveX(2);
+            }
+            if (isPressed(KeyCode.A)) {
+                secondPlayer.animation.play();
+                secondPlayer.animation.setOffsetY(32);
+                secondPlayer.moveX(-2);
+            }
+            if (isPressed(KeyCode.SPACE)){
+                shoot(secondPlayer);
+            }
         }
     }
 
-    private void shoot(Character character){
+    private void shoot(Character character) {
         ImageView bulletIV = new ImageView(bulletImage);
         Bullet bullet = new Bullet(bulletIV, character.direction, character);
         bullets.add(bullet);
         root.getChildren().add(bullet);
+    }
+
+    private void updateBullets(){
+        Bullet removedBullet = null;
+
+        for (Bullet bullet: bullets){
+            bullet.move();
+            if (bullet.getCharacter() == player){
+                if(bullet.checkCollision(secondPlayer)) {
+                    secondPlayer.health -= player.intelligence;
+                    root.getChildren().removeAll(bullet);
+                    if (secondPlayer.health <= 0){
+                        secondPlayerWasDied = true;
+                        root.getChildren().removeAll(secondPlayer);
+                    }
+                    removedBullet = bullet;
+                }
+            } else {
+                if(bullet.checkCollision(player)) {
+                    player.health -= secondPlayer.intelligence;
+                    root.getChildren().removeAll(bullet);
+                    if (player.health <= 0){
+                        playerWasDied = true;
+                        root.getChildren().removeAll(player);
+                    }
+                    removedBullet = bullet;
+                }
+            }
+        }
+
+        bullets.remove(removedBullet);
     }
 
     private boolean isPressed(KeyCode key) {

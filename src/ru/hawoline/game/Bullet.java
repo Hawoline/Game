@@ -8,6 +8,7 @@ public class Bullet extends Pane implements Movement{
     private ImageView imageView;
     private int width = 32;
     private int height = 32;
+    private Character character;
 
     /*
     * 0 - right
@@ -22,8 +23,9 @@ public class Bullet extends Pane implements Movement{
         this.direction = direction;
         getChildren().add(imageView);
 
-        this.setTranslateX(character.getTranslateX());
-        this.setTranslateY(character.getTranslateY());
+        this.character = character;
+        this.setTranslateX(this.character.getTranslateX());
+        this.setTranslateY(this.character.getTranslateY());
     }
 
     @Override
@@ -50,5 +52,13 @@ public class Bullet extends Pane implements Movement{
             case 3:
                 moveY(-1);
         }
+    }
+
+    public Character getCharacter() {
+        return character;
+    }
+
+    boolean checkCollision(Character character){
+        return getBoundsInParent().intersects(character.getBoundsInParent());
     }
 }
